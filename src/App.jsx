@@ -1,9 +1,9 @@
 import { useState } from "react";
 
 function App() {
-  const [ items, setItems ] = useState([]);
+  const [items, setItems] = useState([]);
 
-  function addItems (item) {
+  function addItems(item) {
     setItems((prevState) => {
       return [...prevState, item]
     });
@@ -21,7 +21,7 @@ function App() {
         if (item.id === itemId) {
           return {
             ...item,
-            packed : isPacked
+            packed: isPacked
           }
         } else {
           return item;
@@ -36,7 +36,7 @@ function App() {
         <Logo />
         <Form onAdd={addItems} />
         <PackingList items={items} deleteItems={deleteItems} markAsPacked={markAsPacked} />
-        <Stats />
+        <Stats items={items} />
       </div>
     </>
   )
@@ -86,7 +86,7 @@ function Form({ onAdd }) {
   )
 }
 
-function PackingList({items, deleteItems, markAsPacked}) {
+function PackingList({ items, deleteItems, markAsPacked }) {
   return (
     <div className="list">
       <ul>
@@ -103,7 +103,7 @@ function PackingList({items, deleteItems, markAsPacked}) {
 function Item({ item, deleteItems, markAsPacked }) {
   return (
     <li>
-      <input type="checkbox" id="isPacked" onChange={(e) => markAsPacked(item.id, e.target.checked)} />
+      <input type="checkbox" value={item.packed} onChange={(e) => markAsPacked(item.id, e.target.checked)} />
       <span style={item.packed ? { textDecoration: 'line-through' } : {}}>
         {item.quantity} {item.description}
       </span>
@@ -112,10 +112,20 @@ function Item({ item, deleteItems, markAsPacked }) {
   )
 }
 
-function Stats() {
+function Stats({ items }) {
+  if (!items.length) {
+    return (
+      <footer className="stats">
+        <em>{`Start Adding some items to your packing list ! ✈️`}</em>
+      </footer>
+    )
+  }
+  const numOfItems = items.length;
+  const numOfPackedItems = items.filter(item => item.packed).length;
+  const percentage = Math.round(numOfPackedItems / numOfItems * 100);
   return (
     <footer className="stats">
-      <em>👜 You have X items on your list, and you already packed X.</em>
+      <em>{percentage === 100 ? `You got everything ! Ready to go ✈️` : `👜 You have ${numOfItems} items on your list, and you already packed ${numOfPackedItems} ( ${percentage}% ).`}</em>
     </footer>
   )
 }

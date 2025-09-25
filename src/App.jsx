@@ -1,31 +1,32 @@
 import { useState } from "react";
 
-const initialItems = [
-  {
-    id: 1,
-    description: "Passports",
-    quantity: 2,
-    packed: false
-  },
-  {
-    id: 2,
-    description: "Socks",
-    quantity: 12,
-    packed: true
-  },
-  {
-    id: 3,
-    description: "Charger",
-    quantity: 1,
-    packed: false
-  }
-]
-
 function App() {
-  const [ items, setItems ] = useState(initialItems);
+  const [ items, setItems ] = useState([]);
+
   function addItems (item) {
     setItems((prevState) => {
       return [...prevState, item]
+    });
+  }
+
+  function deleteItems(itemId) {
+    setItems((prevState) => {
+      return prevState.filter((item) => item.id !== itemId);
+    })
+  }
+
+  function markAsPacked(itemId, isPacked) {
+    setItems((prevState) => {
+      return prevState.map((item) => {
+        if (item.id === itemId) {
+          return {
+            ...item,
+            packed : isPacked
+          }
+        } else {
+          return item;
+        }
+      });
     });
   }
 
@@ -34,7 +35,7 @@ function App() {
       <div className="app">
         <Logo />
         <Form onAdd={addItems} />
-        <PackingList items={items} />
+        <PackingList items={items} deleteItems={deleteItems} markAsPacked={markAsPacked} />
         <Stats />
       </div>
     </>
@@ -85,13 +86,13 @@ function Form({ onAdd }) {
   )
 }
 
-function PackingList({items}) {
+function PackingList({items, deleteItems, markAsPacked}) {
   return (
     <div className="list">
       <ul>
         {
           items.map((item) => {
-            return <Item item={item} key={item.id} />
+            return <Item item={item} key={item.id} deleteItems={deleteItems} markAsPacked={markAsPacked} />
           })
         }
       </ul>
@@ -99,20 +100,21 @@ function PackingList({items}) {
   )
 }
 
-function Item({ item }) {
+function Item({ item, deleteItems, markAsPacked }) {
   return (
     <li>
+      <input type="checkbox" id="isPacked" onChange={(e) => markAsPacked(item.id, e.target.checked)} />
       <span style={item.packed ? { textDecoration: 'line-through' } : {}}>
         {item.quantity} {item.description}
       </span>
-      <button>❌</button>
+      <button onClick={() => deleteItems(item.id)}>❌</button>
     </li>
   )
 }
 
 function Stats() {
   return (
-    <footer>
+    <footer className="stats">
       <em>👜 You have X items on your list, and you already packed X.</em>
     </footer>
   )
